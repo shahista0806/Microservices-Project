@@ -1,4 +1,5 @@
 package com.example.product.security;
+
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.*;
@@ -6,6 +7,9 @@ import jakarta.servlet.http.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.io.IOException;
 
@@ -32,10 +36,16 @@ public class JwtFilter extends OncePerRequestFilter {
         try {
             String token = header.substring(7);
 
+            // Validate token
             Jwts.parserBuilder()
                     .setSigningKey(Keys.hmacShaKeyFor(secret.getBytes()))
                     .build()
                     .parseClaimsJws(token);
+
+            UsernamePasswordAuthenticationToken authentication =
+                    new UsernamePasswordAuthenticationToken(null, null, null);
+
+            SecurityContextHolder.getContext().setAuthentication(authentication);
 
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);

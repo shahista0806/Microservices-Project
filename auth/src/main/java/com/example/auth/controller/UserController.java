@@ -17,8 +17,11 @@ public class UserController {
     private JwtUtil jwtUtil;
 
     @PostMapping("/register")
-    public User register(@RequestBody User user) {
-        return userService.register(user);
+    public String register(@RequestBody User user) {
+
+        User savedUser = userService.register(user);
+
+        return jwtUtil.generateToken(savedUser.getUsername());
     }
 
     @PostMapping("/login")
