@@ -1,0 +1,73 @@
+version: "3.9"
+
+services:
+
+    auth-db:
+      image: postgres:15
+      container_name: auth-db
+      environment:
+        POSTGRES_DB: auth1_db
+        POSTGRES_USER: Docker_User
+        POSTGRES_PASSWORD: 12345
+      ports:
+        - "5431:5432"
+      volumes:
+        - auth-db-data:/var/lib/postgresql/data
+      networks:
+        - microservices-network
+
+    product-db:
+      image: postgres:15
+      container_name: product-db
+      environment:
+        POSTGRES_DB: product1_db
+        POSTGRES_USER: Docker_User
+        POSTGRES_PASSWORD: 12345
+      ports:
+        - "5430:5432"
+      volumes:
+        - product-db-data:/var/lib/postgresql/data
+      networks:
+        - microservices-network
+    auth-service:
+      image: auth-service:1.0
+      container_name: auth-service
+      ports:
+      - "5001:5001"
+      environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      networks:
+      - microservices-network
+
+    product-service:
+      image: product-service:1.0
+      container_name: product-service
+      ports:
+      - "5002:5002"
+      environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      depends_on:
+      - auth-service
+      networks:
+      - microservices-network
+
+    api-gateway:
+      image: apigateway:1.0
+      container_name: api-gateway
+      ports:
+      - "5000:5000"
+      environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      depends_on:
+      - auth-service
+      - product-service
+      networks:
+      - microservices-network
+
+networks:
+  microservices-network:
+    driver: bridge
+
+volumes:
+  auth-db-data:
+  product-db-data:
